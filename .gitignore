@@ -1,3 +1,4 @@
 pkg/
 src/tftest/go.sum
 bin/
+example/ec2.hcl
