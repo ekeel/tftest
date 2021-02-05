@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/google/uuid"
 )
 
 type EC2Instance struct {
@@ -70,6 +71,7 @@ func (instance *EC2Instance) DescribeByName() (err error) {
 func (instance *EC2Instance) ValidateProperties(props map[string]string) (validationResults []helpers.ValidationResult, err error) {
 	for key, value := range props {
 		validationResult := helpers.ValidationResult{
+			ID: uuid.NewString(),
 			Name:          key,
 			ExpectedValue: value,
 			ActualValue:   instance.getFieldValue(key),

@@ -1,8 +1,9 @@
 package helpers
 
 type ValidationResult struct {
-	Name string
-	IsMatch bool
+	ID            string
+	Name          string
+	IsMatch       bool
 	ExpectedValue string
-	ActualValue string
+	ActualValue   string
 }
