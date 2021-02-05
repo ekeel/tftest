@@ -16,33 +16,74 @@ func main() {
 		panic(err)
 	}
 
+	validate(config)
+}
+
+func validate(config model.Config) (err error) {
 	for _, test := range config.Tests {
 		switch strings.ToLower(test.Type) {
 		case "ec2":
+			var instance service.EC2Instance
 			switch strings.ToLower(test.QueryBy) {
 			case "name":
-				instance := service.EC2Instance{Name: test.InstanceName}
+				instance = service.EC2Instance{Name: test.InstanceName}
 				err = instance.DescribeByName()
 				if err != nil {
 					panic(err)
 				}
-
-				fieldValidationResults, err := instance.ValidateFields(test.Fields)
+			case "id":
+				instance = service.EC2Instance{InstanceID: test.InstanceID}
+				err = instance.DescribeByID()
 				if err != nil {
 					panic(err)
 				}
-
-				tagValidationResults, err := instance.ValidateTags(test.Tags)
-				if err != nil {
-					panic(err)
-				}
-
-				test.ValidationResults = append(fieldValidationResults, tagValidationResults...)
 			}
+
+			fieldValidationResults, err := instance.ValidateFields(test.Fields)
+			if err != nil {
+				panic(err)
+			}
+
+			tagValidationResults, err := instance.ValidateTags(test.Tags)
+			if err != nil {
+				panic(err)
+			}
+
+			test.ValidationResults = append(fieldValidationResults, tagValidationResults...)
+		case "security_group":
+			var secGroup service.SecurityGroup
+			switch strings.ToLower(test.QueryBy) {
+			case "name":
+				secGroup = service.SecurityGroup{Name: test.InstanceName}
+				err = secGroup.DescribeByName()
+				if err != nil {
+					panic(err)
+				}
+			case "id":
+				secGroup = service.SecurityGroup{GroupID: test.InstanceID}
+				err = secGroup.DescribeByID()
+				if err != nil {
+					panic(err)
+				}
+			}
+
+			fieldValidationResults, err := secGroup.ValidateFields(test.Fields)
+			if err != nil {
+				panic(err)
+			}
+
+			tagValidationResults, err := secGroup.ValidateTags(test.Tags)
+			if err != nil {
+				panic(err)
+			}
+
+			test.ValidationResults = append(fieldValidationResults, tagValidationResults...)
 		}
 	}
 
 	printResults(config)
+
+	return nil
 }
 
 func printResults(config model.Config) {
