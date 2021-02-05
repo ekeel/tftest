@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"strings"
 	"tftest/model"
@@ -11,7 +12,14 @@ import (
 )
 
 func main() {
-	config, err := model.Parse("D:\\projects\\tftest\\example\\ec2.hcl")
+	var configFile string
+
+	flag.StringVar(&configFile, "hcl", "", "")
+
+	flag.Parse()
+
+	// config, err := model.Parse("D:\\projects\\tftest\\example\\ec2.hcl")
+	config, err := model.Parse(configFile)
 	if err != nil {
 		panic(err)
 	}
