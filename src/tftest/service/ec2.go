@@ -67,15 +67,29 @@ func (instance *EC2Instance) DescribeByName() (err error) {
 	return nil
 }
 
-func (instance *EC2Instance) ValidateProperties(props map[string]string) (validationResult []*helpers.ValidationResult, err error) {
-	for _, prop := range props {
-		validationResult.Name = prop.Key
+func (instance *EC2Instance) ValidateProperties(props map[string]string) (validationResults []helpers.ValidationResult, err error) {
+	for key, value := range props {
+		validationResult := helpers.ValidationResult{
+			Name:          key,
+			ExpectedValue: value,
+			ActualValue:   instance.getFieldValue(key),
+		}
+
+		if validationResult.ActualValue == validationResult.ExpectedValue {
+			validationResult.IsMatch = true
+		} else {
+			validationResult.IsMatch = false
+		}
+
+		validationResults = append(validationResults, validationResult)
 	}
+
+	return validationResults, nil
 }
 
-func (instance *EC2Instance) getFieldValue(field string) (value string, err error) {
-	r := reflect.ValueOf(instance)
+func (instance *EC2Instance) getFieldValue(field string) (value string) {
+	r := reflect.ValueOf(instance.InstanceDescription)
 	f := reflect.Indirect(r).FieldByName(field)
 
-	return f.String(), nil
+	return f.String()
 }
