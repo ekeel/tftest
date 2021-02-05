@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"reflect"
+	"tftest/helpers"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -65,6 +67,15 @@ func (instance *EC2Instance) DescribeByName() (err error) {
 	return nil
 }
 
-func (instance *EC2Instance) ValidateProperties(props map[string]string) (validationResult ValidationResult, err error) {
-	
+func (instance *EC2Instance) ValidateProperties(props map[string]string) (validationResult []*helpers.ValidationResult, err error) {
+	for _, prop := range props {
+		validationResult.Name = prop.Key
+	}
+}
+
+func (instance *EC2Instance) getFieldValue(field string) (value string, err error) {
+	r := reflect.ValueOf(instance)
+	f := reflect.Indirect(r).FieldByName(field)
+
+	return f.String(), nil
 }
