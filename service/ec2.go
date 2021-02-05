@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"strings"
 	"tftest/model"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -103,7 +104,7 @@ func (instance *EC2Instance) ValidateFields(props map[string]string) (validation
 			Type:          "ec2:field",
 			Name:          key,
 			ExpectedValue: value,
-			ActualValue:   instance.getFieldValue(key),
+			ActualValue:   instance.getFieldValue(key, value),
 		}
 
 		if validationResult.ActualValue == validationResult.ExpectedValue {
@@ -229,11 +230,23 @@ func getTags(tagsDescription []types.Tag) (tags map[string]string) {
 }
 
 // getFieldValue using reflection to get the value of the field specified.
-func (instance *EC2Instance) getFieldValue(field string) (value string) {
-	obj := reflect.ValueOf(instance.InstanceDescription)
-	fieldVal := reflect.Indirect(obj).FieldByName(field)
+func (instance *EC2Instance) getFieldValue(field string, fieldValue string) (value string) {
+	switch strings.ToLower(field) {
+	case "securitygroup":
+		for _, secGroup := range instance.InstanceDescription.SecurityGroups {
+			if *secGroup.GroupName == fieldValue {
+				return *secGroup.GroupName
+			}
+		}
 
-	return fieldVal.Elem().String()
+	default:
+		obj := reflect.ValueOf(instance.InstanceDescription)
+		fieldVal := reflect.Indirect(obj).FieldByName(field)
+
+		return fieldVal.Elem().String()
+	}
+
+	return ""
 }
 
 // checkPrompt checks if the current SSH command output is a prompt.
