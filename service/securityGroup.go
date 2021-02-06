@@ -130,5 +130,9 @@ func (secGroup *SecurityGroup) getFieldValue(field string) (value string) {
 	obj := reflect.ValueOf(secGroup.SecurityGroupDescription)
 	fieldVal := reflect.Indirect(obj).FieldByName(field)
 
-	return fieldVal.Elem().String()
+	if fieldVal.Kind() == reflect.Ptr {
+		return fieldVal.Elem().String()
+	}
+
+	return fieldVal.String()
 }
