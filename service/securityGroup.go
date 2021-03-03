@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
 	"tftest/model"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -127,12 +128,21 @@ func (secGroup *SecurityGroup) ValidateTags(props map[string]string) (validation
 }
 
 func (secGroup *SecurityGroup) getFieldValue(field string) (value string) {
-	obj := reflect.ValueOf(secGroup.SecurityGroupDescription)
-	fieldVal := reflect.Indirect(obj).FieldByName(field)
+	//switch strings.ToLower(field) {
+	//case "ingress":
+	//
+	//}
+	//
+	//fmt.Printf("%#v\n", secGroup.SecurityGroupDescription.IpPermissions[0])
 
-	if fieldVal.Kind() == reflect.Ptr {
-		return fieldVal.Elem().String()
+	obj := reflect.ValueOf(secGroup.SecurityGroupDescription)
+	for _, p := range strings.Split(field, ".") {
+		obj = reflect.Indirect(obj).FieldByName(p)
 	}
 
-	return fieldVal.String()
+	if obj.Kind() == reflect.Ptr {
+		return obj.Elem().String()
+	}
+
+	return fmt.Sprintf("%v", obj)
 }

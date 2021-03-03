@@ -104,8 +104,8 @@ func printResults(config model.Config) {
 			tbl.AppendRows([]table.Row{
 				{test.Name, res.Type, res.Name, res.IsMatch, res.ExpectedValue, res.ActualValue},
 			})
-			tbl.AppendSeparator()
 		}
+		tbl.AppendSeparator()
 	}
 
 	tbl.SetRowPainter(table.RowPainter(func(row table.Row) text.Colors {

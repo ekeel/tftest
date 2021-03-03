@@ -87,8 +87,6 @@ func (instance *EC2Instance) DescribeByName() (err error) {
 			tags := getTags(inst.Tags)
 
 			if tags["Name"] == instance.Name {
-				// fmt.Printf("\n\n\n%+v\n\n\n", inst.Platform)
-
 				instance.Tags = tags
 				instance.InstanceDescription = inst
 			}
@@ -243,13 +241,15 @@ func (instance *EC2Instance) getFieldValue(field string, fieldValue string) (val
 
 	default:
 		obj := reflect.ValueOf(instance.InstanceDescription)
-		fieldVal := reflect.Indirect(obj).FieldByName(field)
-
-		if fieldVal.Kind() == reflect.Ptr {
-			return fieldVal.Elem().String()
+		for _, p := range strings.Split(field, ".") {
+			obj = reflect.Indirect(obj).FieldByName(p)
 		}
 
-		return fieldVal.String()
+		if obj.Kind() == reflect.Ptr {
+			return obj.Elem().String()
+		}
+
+		return fmt.Sprintf("%v", obj)
 	}
 
 	return ""
